@@ -1,5 +1,5 @@
 Subject: [0c7a48b3b807] [PATCH 01/02] Task 08: add jiffies file
-Message-id: slave
+
 --- moduleTask08.c	2017-07-23 17:43:02.743362743 +0430
 +++ moduleTask08-p1.c	2017-07-23 17:41:43.246968542 +0430
 @@ -6,6 +6,7 @@
