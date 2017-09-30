@@ -1,5 +1,4 @@
 Subject: [0c7a48b3b807] Task 08 results
-Message-id: master
 
 #include <linux/module.h>
 #include <linux/kernel.h>
