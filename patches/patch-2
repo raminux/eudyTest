@@ -1,0 +1,71 @@
+--- moduleTask08-p1.c	2017-07-23 17:41:43.246968542 +0430
++++ moduleTask08-p2.c	2017-07-23 17:32:34.576247831 +0430
+@@ -7,8 +7,13 @@
+ #include <linux/uaccess.h>
+ #include <linux/string.h>
+ #include <linux/jiffies.h>
++#include <linux/semaphore.h>
++
+ 
+ struct dentry *dir_dentry;
++char data[PAGE_SIZE];
++//DEFINE_SEMAPHORE(sem);
++DEFINE_MUTEX(mu);
+ 
+ ssize_t id_read(struct file *file,
+ 	char __user *buf, /* The buffer to fill with data */
+@@ -44,6 +49,41 @@ const struct file_operations id_fops = {
+ };
+ 
+ 
++
++ssize_t foo_read(struct file *file,
++	char __user *buf, /* The buffer to fill with data */
++	size_t len, /* The length of the buffer */
++	loff_t *ppos) /* Our offset in the file */
++{
++	ssize_t ret;
++	//down(&sem);
++	mutex_lock(&mu);
++	ret = simple_read_from_buffer(buf, len, ppos, data, PAGE_SIZE);
++	//up(&sem);
++	mutex_unlock(&mu);
++	return ret;
++}
++
++ssize_t foo_write(struct file *file,
++	const char __user *buf, /* The buffer to fill with data */
++	size_t len, /* The length of the buffer */
++	loff_t *ppos) /* Our offset in the file */
++{
++	ssize_t ret;
++	//down(&sem);
++	mutex_lock(&mu);
++	ret = simple_write_to_buffer(data, PAGE_SIZE, ppos, buf, len);
++	//up(&sem);
++	mutex_unlock(&mu);
++	return ret;
++}
++
++const struct file_operations foo_fops = {
++	.owner = THIS_MODULE,
++	.write = foo_write,
++	.read = foo_read,
++};
++
+ static int __init Task08_init(void)
+ {
+ 	dir_dentry = debugfs_create_dir("eudyptula", NULL);
+@@ -53,9 +93,11 @@ static int __init Task08_init(void)
+ 	}
+ 	
+ 	debugfs_create_file("id", 0666, dir_dentry, NULL, &id_fops);
+-
++	
+ 	debugfs_create_u32("jiffies", 0444, dir_dentry, (u32*) &jiffies);
+ 
++	debugfs_create_file("foo", 0644, dir_dentry, NULL, &foo_fops);
++
+ 	pr_debug("Hello, world!\n");
+ 	return 0;
+ }
