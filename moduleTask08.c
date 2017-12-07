@@ -6,6 +6,7 @@
 #include <linux/errno.h>
 #include <linux/uaccess.h>
 #include <linux/string.h>
+#include <linux/jiffies.h>
 
 struct dentry *dir_dentry;
 
@@ -52,6 +53,8 @@ static int __init Task08_init(void)
 	}
 	
 	debugfs_create_file("id", 0666, dir_dentry, NULL, &id_fops);
+
+	debugfs_create_u32("jiffies", 0444, dir_dentry, (u32*) &jiffies);
 
 	pr_debug("Hello, world!\n");
 	return 0;
